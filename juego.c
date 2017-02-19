@@ -279,7 +279,7 @@ int main(int argc, char **argv) {
     // evitamos que se suspenda la computadora mientras esta el juego abierto
     al_inhibit_screensaver(1);
     // le ponemos un titulo a nuestro display
-    al_set_window_title(display, "!!!!GALAGA!!!");
+    al_set_window_title(display, "!!!!SPACE ATTACK!!!");
     // al principio queremos que tenga fondo negro
     al_clear_to_color(al_map_rgb(0, 0, 0));
     // hacemos que se muestre lo que dibujamos
