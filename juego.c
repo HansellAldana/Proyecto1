@@ -19,7 +19,7 @@ enum KEYS{
     P
 };
 
-int teclas[6] = {0, 0, 0, 0, 0};
+int teclas[6] = {0, 0, 0, 0, 0, 0};
 //***************************************************************************************************************************************************
 //DEFINIMOS ESTRUCTURAS
 
@@ -42,6 +42,12 @@ typedef struct enemy{
     ALLEGRO_BITMAP *ene;
 
 }enemy_t;
+typedef struct fondo{
+    int x;
+    int y;
+    ALLEGRO_BITMAP *fon;
+
+}fondo_t;
 
 
 
@@ -49,7 +55,7 @@ typedef struct enemy{
 //DIBUJAMOS ESTRUCTURAS
 
 // funcion ayuda que dibuja a nuestra navecita
-void dibujarJugador(jugador_t *jugador) {
+void dibujarJugador(fondo_t *fond, jugador_t *jugador) {
     al_clear_to_color(al_map_rgb(0,0,0));//(51, 153, 255));
     al_draw_bitmap(jugador->nave, jugador->x, jugador->y, 0);
    
@@ -59,11 +65,12 @@ void dibujarJugador(jugador_t *jugador) {
 
 
 //DIBUJAMOS LA BALA
-void dibujarBala(bala_t *bala, jugador_t *jugador,enemy_t *denemigo,enemy_t *denemigo2,enemy_t *denemigo3,enemy_t *denemigo4,enemy_t *denemigo5) {
+void dibujarBala(fondo_t *fondo,bala_t *bala, jugador_t *jugador,enemy_t *denemigo,enemy_t *denemigo2,enemy_t *denemigo3,enemy_t *denemigo4,enemy_t *denemigo5) {
     al_clear_to_color(al_map_rgb(0,0,0));//(51, 153, 255));
-      al_draw_bitmap(bala->bla, bala->x, bala->y, 0);
-         al_draw_bitmap(denemigo->ene, denemigo->x, denemigo->y, 0);
-          al_draw_bitmap(denemigo2->ene, denemigo2->x, denemigo2->y, 0);
+    al_draw_bitmap(fondo->fon, fondo->x, fondo->y, 0);
+    al_draw_bitmap(bala->bla, bala->x, bala->y, 0);
+    al_draw_bitmap(denemigo->ene, denemigo->x, denemigo->y, 0);
+    al_draw_bitmap(denemigo2->ene, denemigo2->x, denemigo2->y, 0);
     al_draw_bitmap(denemigo3->ene, denemigo3->x, denemigo3->y, 0);
     al_draw_bitmap(denemigo4->ene, denemigo4->x, denemigo4->y, 0);
     al_draw_bitmap(denemigo5->ene, denemigo5->x, denemigo5->y, 0);
@@ -73,8 +80,9 @@ void dibujarBala(bala_t *bala, jugador_t *jugador,enemy_t *denemigo,enemy_t *den
 
 }
 //DIBUJAMOS ENEMIGOS
-void dibujarEnemigos(enemy_t *denemigo,enemy_t *denemigo2,enemy_t *denemigo3,enemy_t *denemigo4,enemy_t *denemigo5,jugador_t *jugador){
+void dibujarEnemigos(fondo_t *fondo,enemy_t *denemigo,enemy_t *denemigo2,enemy_t *denemigo3,enemy_t *denemigo4,enemy_t *denemigo5,jugador_t *jugador){
     al_clear_to_color(al_map_rgb(0,0,0));
+     al_draw_bitmap(fondo->fon, fondo->x, fondo->y, 0);
     al_draw_bitmap(denemigo->ene, denemigo->x, denemigo->y, 0);
     al_draw_bitmap(denemigo2->ene, denemigo2->x, denemigo2->y, 0);
     al_draw_bitmap(denemigo3->ene, denemigo3->x, denemigo3->y, 0);
@@ -289,30 +297,34 @@ int main(int argc, char **argv) {
     al_register_event_source(event_queue, al_get_timer_event_source(timer));
 
 //***************************************************************************************************************************************************
-//CREAMOS JUGADORES, BALAS, ENEMIGOS.
+//CREAMOS JUGADORES, BALAS, ENEMIGOS, FONDO.
+     fondo_t *fond = (fondo_t *)malloc(sizeof(fondo_t));
+    fond->fon = al_load_bitmap("fondo.png");
+    fond->x =0;
+    fond->y=0;
 
     enemy_t *enemy1 = (enemy_t *)malloc(sizeof(enemy_t));
     enemy1->ene = al_load_bitmap("Enemi.png");
-    enemy1->x = 500;
+    enemy1->x = 100;
     enemy1->y=100;
 
     enemy_t *enemy2 = (enemy_t *)malloc(sizeof(enemy_t));
     enemy2->ene = al_load_bitmap("Enemi.png");
-    enemy2->x = 600;
+    enemy2->x = 300;
     enemy2->y=100;
 
     enemy_t *enemy3 = (enemy_t *)malloc(sizeof(enemy_t));
     enemy3->ene = al_load_bitmap("Enemi.png");
-    enemy3->x = 700;
+    enemy3->x = 500;
     enemy3->y=100;
 
     enemy_t *enemy4 = (enemy_t *)malloc(sizeof(enemy_t));
     enemy4->ene = al_load_bitmap("Enemi.png");
-    enemy4->x = 400;
+    enemy4->x = 700;
     enemy4->y=100;
     enemy_t *enemy5 = (enemy_t *)malloc(sizeof(enemy_t));
     enemy5->ene = al_load_bitmap("Enemi.png");
-    enemy5->x = 300;
+    enemy5->x = 900;
     enemy5->y=100;
 
 
@@ -364,7 +376,7 @@ int main(int argc, char **argv) {
 //CREAMOS DEMAS CONDICIONES Y AL JUGADOR
 
     // dibujemos al jugador por primera vez
-      dibujarEnemigos(enemy1,enemy2,enemy3,enemy4,enemy5,player);
+      dibujarEnemigos(fond,enemy1,enemy2,enemy3,enemy4,enemy5,player);
 
  
     //dibujarEnemigos(enemy1);
@@ -379,15 +391,50 @@ int main(int argc, char **argv) {
 
     // bandera para salir del juego se preciona escape
     int terminar = 0;
-
+    int puntos = 0;
     // una variable que recibe eventos (?)
     ALLEGRO_EVENT ev;
 //***************************************************************************************************************************************************
 //WHILE QUE REVISA EVENTOS DOWN UP Y TIMER(ACCIONES)
-
+    int enemis[5]={0,0,0,0,0};
+    int lvl=0;
     // loop del juego
     while(!terminar) {
+        if(enemis[0]==1&&enemis[1]==1&&enemis[2]==1&&enemis[3]==1&&enemis[4]==1){
+            lvl = lvl+1;
+            enemis[0]=0;
+            enemis[0]=0;
+            enemis[0]=0;
+            enemis[0]=0;
+            enemis[0]=0;
+            enemy1->y = 100;
+            enemy2->y = 100;
+            enemy3->y = 100;
+            enemy4->y = 100;
+            enemy5->y = 100;
 
+            if (lvl==3){
+            enemy1->ene=al_load_bitmap("Enemi2.png");
+            enemy2->ene=al_load_bitmap("Enemi2.png");
+            enemy3->ene=al_load_bitmap("Enemi2.png");
+            enemy4->ene=al_load_bitmap("Enemi2.png");
+            enemy5->ene=al_load_bitmap("Enemi2.png");
+            }else if (lvl>=6){
+            enemy1->ene=al_load_bitmap("Enemi3.png");
+            enemy2->ene=al_load_bitmap("Enemi3.png");
+            enemy3->ene=al_load_bitmap("Enemi3.png");
+            enemy4->ene=al_load_bitmap("Enemi3.png");
+            enemy5->ene=al_load_bitmap("Enemi3.png");
+            }else{
+            enemy1->ene=al_load_bitmap("Enemi.png");
+            enemy2->ene=al_load_bitmap("Enemi.png");
+            enemy3->ene=al_load_bitmap("Enemi.png");
+            enemy4->ene=al_load_bitmap("Enemi.png");
+            enemy5->ene=al_load_bitmap("Enemi.png");
+            }
+            
+
+        }
         if((balas->x <= enemy1->x+50)&&(balas->x+50 >= enemy1->x)&&(balas->y <=enemy1->y+56)&&(balas->y+56 <=enemy1->y)){
            // usleep(10);
           // enemy1->ene=al_load_bitmap("die.png");
@@ -397,33 +444,37 @@ int main(int argc, char **argv) {
 
 
             //al_destroy_bitmap(enemy1->ene);
+            enemis[0]=1;
+            puntos +=10;
+            printf("Score: %d\n",puntos );
             balas->bla=al_load_bitmap("black.png");
           enemy1->ene=al_load_bitmap("black.png");
         }else if((balas->x <= enemy2->x+50)&&(balas->x+50 >= enemy2->x)&&(balas->y <=enemy2->y+56)&&(balas->y+56 <=enemy2->y)){
             balas->bla=al_load_bitmap("black.png");
           enemy2->ene=al_load_bitmap("black.png");
-
+          enemis[1]=1;
+           puntos +=10;
+            printf("Score: %d\n",puntos );
         }
         else if((balas->x <= enemy3->x+50)&&(balas->x+50 >= enemy3->x)&&(balas->y <=enemy3->y+56)&&(balas->y+56 <=enemy3->y)){
             balas->bla=al_load_bitmap("black.png");
           enemy3->ene=al_load_bitmap("black.png");
-
+          enemis[2]=1;
+           puntos +=10;
+            printf("Score: %d\n",puntos );
         }
         else if((balas->x <= enemy4->x+50)&&(balas->x+50 >= enemy4->x)&&(balas->y <=enemy4->y+56)&&(balas->y+56 <=enemy4->y)){
             balas->bla=al_load_bitmap("black.png");
           enemy4->ene=al_load_bitmap("black.png");
+          enemis[3]=1;
 
         }
         else if((balas->x <= enemy5->x+50)&&(balas->x+50 >= enemy5->x)&&(balas->y <=enemy5->y+56)&&(balas->y+56 <=enemy5->y)){
             balas->bla=al_load_bitmap("black.png");
           enemy5->ene=al_load_bitmap("black.png");
-
-        }
-        else if((player->x <= enemy5->x+50)&&(player->x+50 >= enemy5->x)&&(player->y <=enemy5->y+56)&&(player->y+56 <=enemy5->y)){
-            player->nave=al_load_bitmap("die.png");
-          enemy5->ene=al_load_bitmap("black.png");
-          usleep(1000);
-          //terminar=true;
+          enemis[4]=1;
+           puntos +=10;
+            printf("Score: %d\n",puntos );
 
         }
             /*
@@ -450,21 +501,13 @@ int main(int argc, char **argv) {
 			moverEnemigos3lvl1(enemy1);
 			moverEnemigos3lvl1(enemy3);
             
-		}else if(test==3){
+		}else{
             moverEnemigos2lvl1(enemy4);
             moverEnemigos2lvl1(enemy5);
 			moverEnemigos2lvl1(enemy2);
 			moverEnemigos2lvl1(enemy1);
 			moverEnemigos2lvl1(enemy3);
             
-		}else {
-            moverEnemigos4lvl1(enemy4);
-            moverEnemigos4lvl1(enemy5);
-			moverEnemigos4lvl1(enemy2);
-			moverEnemigos4lvl1(enemy1);
-			moverEnemigos4lvl1(enemy3);
-            
-
 		}
 			
        
@@ -625,12 +668,12 @@ int main(int argc, char **argv) {
                             while(balas->y>=0){
 
                                
-                            dibujarBala(balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
+                            dibujarBala(fond,balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
                             b1++;
 
                             moverBaRI(balas,player);
                             if (b1==1){
-                                dibujarBala(balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
+                                dibujarBala(fond,balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
                             b1++;
                             moverBaRI(balas,player);
                             }
@@ -645,12 +688,12 @@ int main(int argc, char **argv) {
                             while(balas->y>=0){
 
                                
-                            dibujarBala(balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
+                            dibujarBala(fond,balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
                             b1++;
 
                             moverBaLE(balas,player);
                             if (b1==1){
-                                dibujarBala(balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
+                                dibujarBala(fond,balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
                             b1++;
                             moverBaLE(balas,player);
                             }
@@ -699,12 +742,12 @@ int main(int argc, char **argv) {
                             while(balas->y>=0){
 
                                
-                            dibujarBala(balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
+                            dibujarBala(fond,balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
                             b1++;
                             moverBala(balas);
                            
                             if (b1==1){
-                                dibujarBala(balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
+                                dibujarBala(fond,balas, player,enemy1,enemy2,enemy3,enemy4,enemy5);
                             b1++;
                             moverBala(balas);
                          
@@ -717,7 +760,7 @@ int main(int argc, char **argv) {
 
         }
         // dibujamos al jugador
-        dibujarEnemigos(enemy1,enemy2,enemy3,enemy4,enemy5,player);
+        dibujarEnemigos(fond,enemy1,enemy2,enemy3,enemy4,enemy5,player);
        
         al_flip_display();
 
