@@ -1,7 +1,7 @@
 # Project1
 Proyecto 1 CC3: Videojuego en C o Editor de Texto
 
-"SPACE ATTACK PRO EDITION SO HARD"
+"SPACE ATTACK"
 *****************************************
 Hansell Daniel Aldana Arevalo 16004138
 jogly Alejandro Ruano portillo 15000139
